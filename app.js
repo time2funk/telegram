@@ -1,1 +1,1 @@
-require('./test/heroku.js');
+require('./sadbot/index.js');

@@ -1,7 +1,7 @@
 {
-  "name": "find-home",
+  "name": "reddit",
   "version": "1.0.0",
-  "description": "let find a home",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,7 +9,7 @@
   "author": "sadman",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3",
-    "node-telegram-bot-api": "^0.30.0"
+    "axios": "^0.18.0",
+    "telegraf": "^3.20.0"
   }
 }
