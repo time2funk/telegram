@@ -1,14 +1,12 @@
-const TelegramBot = require('node-telegram-bot-api');
-const herokuName = 'sad-telegram-bot'
 
-if (process.env.NODE_ENV === 'production') {
-    bot = new Bot(SadToken);
-    bot.setWebHook(`https://${herokuName}.herokuapp.com:${SadPort}` + bot.token);
-} else {
+
+const token = '574129124:AAEh98_LgjD4VR4u4uvl-USZhLYaakPCoqY';
+
+var Bot = require('node-telegram-bot-api'),
     bot = new Bot(token, {
         polling: true
     });
-}
+
 console.log('bot server started...');
 
 bot.onText(/^\/say_hello (.+)$/, function(msg, match) {
