@@ -1,23 +1,22 @@
-
 const TelegramBot = require('node-telegram-bot-api');
-const herokuName = 'sad-telegram-bot'
+const herokuName = 'sad-telegram-bot';
 
 if (process.env.NODE_ENV === 'production') {
-    bot = new Bot(SadToken);
-    bot.setWebHook(`https://${herokuName}.herokuapp.com:${SadPort}` + bot.token);
+    console.log(' <-> production NODE_ENV');
+    console.log(' <-> TOKEN ' + process.env.TOKEN);
+    console.log(' <-> PORT ' + process.env.PORT);
+    bot = new TelegramBot(process.env.TOKEN);
+    bot.setWebHook(`https://${herokuName}.herokuapp.com:443/${process.env.TOKEN}`);
 } else {
     bot = new Bot(token, {
         polling: true
     });
 }
-console.log('bot server started...');
+console.log(' <-> bot server started...');
 
 bot.onText(/^\/say_hello (.+)$/, function(msg, match) {
     var name = match[1];
-    bot.sendMessage(msg.chat.id, 'Hello ' + name + '!').then(function() {
-        // reply sent!
-        console.log('reply sent!');
-    });
+    bot.sendMessage(msg.chat.id, 'Hello ' + name + '!');
 });
 
 bot.onText(/^\/sum((\s+\d+)+)$/, function(msg, match) {
@@ -25,8 +24,5 @@ bot.onText(/^\/sum((\s+\d+)+)$/, function(msg, match) {
     match[1].trim().split(/\s+/).forEach(function(i) {
         result += (+i || 0);
     })
-    bot.sendMessage(msg.chat.id, result).then(function() {
-        // reply sent!
-        console.log('reply sent!');
-    });
+    bot.sendMessage(msg.chat.id, result);
 });

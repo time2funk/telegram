@@ -1,5 +1,4 @@
-const SadToken = process.env.TOKEN;
-const SadPort = process.env.PORT || 443
+
 require('./bot');
 
 var express = require('express');
@@ -14,12 +13,13 @@ app.get('/', function(req, res) {
         version: packageInfo.version
     });
 });
-app.post('/' + SadToken, function(req, res) {
+app.post('/' + process.env.TOKEN, function(req, res) {
+	console.log('POST request '+req.body);
     bot.processUpdate(req.body);
     res.sendStatus(200);
 });
 
-var server = app.listen(SadPort, function() {
+var server = app.listen(process.env.PORT, function() {
     var host = server.address().address;
     var port = server.address().port;
 
