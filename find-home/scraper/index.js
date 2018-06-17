@@ -1,17 +1,20 @@
 'use strict';
-
 const Nightmare = require("nightmare");
+const Xvfb = require('xvfb');
+const xvfb = new Xvfb();
 
 module.exports.getLink = async function(url) {
     try{
 
         console.log(' -> start getLink Nightmare');
+
         if (!url) return;
 
         console.log('url');
         console.log(url);
         
         return new Promise((resolve, reject)=>{
+xvfb.start(function(err, xvfbProcess) {
             Nightmare({
                 'ignore-certificate-errors': true,
                 'node-integration': false,
@@ -27,7 +30,9 @@ module.exports.getLink = async function(url) {
             })
             .on('crashed', function(event, url){
                 console.log('[Nightmare] crashed');
-                reject('crashed');
+                xvfb.stop(function(err) {
+                    reject('crashed');
+                });                
             })
             .on('did-fail-load', function(event){
                 console.log('[Nightmare] did-fail-load');
@@ -43,19 +48,21 @@ module.exports.getLink = async function(url) {
             // .viewport(2000, 1000)
             .wait(2000)
             .evaluate(function(url) {
-                console.log(' ! - ! - ! - evaluate - ! - ! - !');
+                // console.log(' ! - ! - ! - evaluate - ! - ! - !');
                 var list, 
                     result = [];
 
                 if(url.search(/olx\.pl/i) != -1){
-                    console.log(' - - - > olx');
+                    // console.log(' - - - > olx');
 
                     list = document.querySelectorAll('div.listHandler #offers_table>tbody>tr');
                     if(!list)
-                        reject('broken link');
+                        xvfb.stop(function(err) {
+                            reject('broken link');
+                        });
+                        
 
                     for(var i=0; i<list.length; i++){
-                        console.log('FOR LOOP ITERATION: '+i);
                         var ad = list[i];
                         if( !ad.querySelector('tr td div.space.rel p.marginbott5 span') ) continue;
 
@@ -64,10 +71,12 @@ module.exports.getLink = async function(url) {
                         let location = ad.querySelector('tr td div.space.rel p.marginbott5 span').innerText;
                         let date = ad.querySelector('tr td div.space.rel p.x-normal').innerText;
                         let price = ad.querySelector('tr td div.space.rel.inlblk p.price strong').innerText;
-                        let pic = ad.querySelector('img').getAttribute("src");
+                        let link = ad.querySelector('tr td div.space.rel a').getAttribute("href");
                         let trade = ad.querySelector('tr td div.space.rel.inlblk span.normal.inlblk.pdingtop5');
+                        let pic = ad.querySelector('img');
+                        pic = pic ?  pic.getAttribute("src") : "<no thumb photo>";
 
-                        if( id && name && location && date && price && pic ){
+                        if( id && name && location && date && price && pic && link){
                             if(trade) trade = true; 
                             else trade = false;
 
@@ -78,9 +87,10 @@ module.exports.getLink = async function(url) {
                                 date: date,
                                 price: price,
                                 pic: pic,
+                                link: link,
                                 trade: trade
                             });
-                        }
+                        }else reject('broken evaluate html parsing');
                     }
                 }
                 // else if (url.search(/xhamster\.com/i) != -1){
@@ -101,25 +111,36 @@ module.exports.getLink = async function(url) {
                 //         reject('broken link');
                 //     link = obj.src;
                 // }
-                else{
-                    reject('wrong link');
+                else{ 
+                    xvfb.stop(function(err) {
+                        reject('wrong link');
+                    });                    
                 }
 
                 if(!result) 
-                    reject('empty result array');
+                    xvfb.stop(function(err) {
+                        reject('empty result array');
+                    });
+                    
                 return result;
             }, url)
             .end()
     		.then(function(results) {
     		    console.log(" - donor html list - ");
     		    console.log(results);
-		        resolve(results);
+                xvfb.stop(function(err) {
+                    resolve(results);
+                });
     		})
             .catch(err => {
                 console.log(" { Nightmare REJECT } ");
                 console.error(err);
-                reject(err);
+                xvfb.stop(function(err) {
+                    reject(err);
+                });
+                
             })
+}); // xvfb
         });
 
     } catch (e) {
